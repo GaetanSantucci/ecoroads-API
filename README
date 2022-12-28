@@ -1,0 +1,33 @@
+# Mapping API on NodeJS
+
+## Introduction
+
+This API is intended for electric car owners in order to create a route between point A and point B according to their centers of interest and the model of their car.
+
+V1
+
+- Choose your vehicle
+- Choose a departure and arrival address
+- Choose your points of interest
+- Generate a route between the two addresses
+- Update your vehicle, address and your points of interest
+- Create , update and delete a user
+
+V2
+
+- Add a new center of interest
+- Vote for a new center of interest
+- Share a ride
+- Set a favorite route
+
+---
+
+Technologies used are :
+
+- Node JS
+- Express JS
+- TypeScript JS
+- Dotenv for environment variables
+- Helmet for API protection
+- Eslint for linter
+- PostgreSQL for DBSM
