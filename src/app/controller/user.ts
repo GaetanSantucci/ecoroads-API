@@ -1,8 +1,12 @@
 import { Request, Response } from 'express'
+import { User } from '../datamapper/user.js';
 
+
+//? ----------------------------------------------------------- GET ALL USERS
 const getAllUsers = async (req: Request, res: Response) => {
   try {
-    res.json("Users list")
+    const usersList = await User.findAll();
+    res.json(usersList)
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ "error": error.message })
@@ -10,17 +14,8 @@ const getAllUsers = async (req: Request, res: Response) => {
   }
 }
 
-const getUser = async (req: Request, res: Response) => {
-  const id: number = +req.params.id
-  try {
-    res.json(`User number : ${id}`)
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ "error": error.message })
-    }
-  }
-}
 
+//? ----------------------------------------------------------- CREATE USER
 const signUp = async (req: Request, res: Response) => {
   try {
     res.json("User has signed up !")
@@ -31,9 +26,13 @@ const signUp = async (req: Request, res: Response) => {
   }
 }
 
+
+//? ----------------------------------------------------------- LOGIN
 const signIn = async (req: Request, res: Response) => {
+  const email: string = req.body.email;
   try {
-    res.json("User has been successfully connected !")
+    const user = await User.findUserIdentity(email);
+    return res.json(user)
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ "error": error.message })
@@ -41,6 +40,8 @@ const signIn = async (req: Request, res: Response) => {
   }
 }
 
+
+//? ----------------------------------------------------------- LOGOUT
 const signOut = async (req: Request, res: Response) => {
   try {
     res.json("User has been disconnected !")
@@ -51,6 +52,8 @@ const signOut = async (req: Request, res: Response) => {
   }
 }
 
+
+//? ----------------------------------------------------------- UPDATE USER
 const updateUser = async (req: Request, res: Response) => {
   try {
     res.json("User was successfully updated !")
@@ -61,6 +64,8 @@ const updateUser = async (req: Request, res: Response) => {
   }
 }
 
+
+//? ----------------------------------------------------------- DELETE USER
 const deleteUser = async (req: Request, res: Response) => {
   try {
     res.json("User has been deleted !")
@@ -72,4 +77,4 @@ const deleteUser = async (req: Request, res: Response) => {
 }
 
 
-export { getAllUsers, getUser, signUp, signIn, signOut, updateUser, deleteUser } 
+export { getAllUsers, signUp, signIn, signOut, updateUser, deleteUser } 

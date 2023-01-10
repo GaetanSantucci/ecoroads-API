@@ -7,9 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import User from '../model/user.js';
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        res.json("Users list");
+        const usersList = yield User.findAllUsers();
+        res.json(usersList);
     }
     catch (error) {
         if (error instanceof Error) {

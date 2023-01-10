@@ -1,7 +1,6 @@
-module.exports = {
-  transform: { '^.+\\.ts$': 'ts-jest' },
-  moduleFileExtensions: ['js', 'ts'],
-  testMatch: ['**/test/**/*.test.(ts|js)'],
-  testEnvironment: 'node',
-  setupFiles: ['dotenv/config']
-};
+export const transform = { '^.+\\.ts$': 'ts-jest' };
+export const moduleFileExtensions = ['js', 'ts'];
+// export const testMatch = ['**/test/**/*.test.(ts|js)'];
+export const testMatch = ['_tests_/**/*.test.(ts|js)'];
+export const testEnvironment = 'node';
+export const setupFiles = ['dotenv/config'];

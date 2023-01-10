@@ -6,12 +6,10 @@
     "target": "es6",
     "strict": true,
     "moduleResolution": "node",
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node", "express", "pg", "debug"]
   },
-  // "include": [
-  //   "./app/**/*"
-  // ],
-  // "exclude": ["node_modules"],
+  "exclude": ["node_modules", "_tests_", "jest.config.js"],
   "lib": ["es2015"],
   "compileOnSave": true
 }
