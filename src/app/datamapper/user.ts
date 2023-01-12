@@ -1,10 +1,10 @@
 import pg from 'pg';
 import { client } from '../services/dbClient.js';
-import { CoreDataMapper } from '../services/coreDatamapper.js';
+import { CoreDataMapper } from './coreDatamapper.js';
 
 class UserDataMapper extends CoreDataMapper {
   tableName = 'user';
-  columns = `"id",first_name", "last_name", "email", "password"`
+  columns = `"id","email","last_name","first_name"`
 
   createFunctionName = 'create_user';
   updateFunctionName = 'update_user';
@@ -21,6 +21,7 @@ class UserDataMapper extends CoreDataMapper {
       };
 
       const result = await this.client.query(preparedQuery);
+      console.log('result: ', result);
       if (!result.rows[0]) return null;
       return result.rows[0];
     }

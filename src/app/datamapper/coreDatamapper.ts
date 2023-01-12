@@ -31,14 +31,12 @@ class CoreDataMapper {
   async create(inputData: object) {
     if (this.client instanceof pg.Pool) {
       const preparedQuery = {
-
-        // todo PAS TOUT COMPRIS
-        text: `SELECT * FROM ${this.createFunctionName}($1);`,
+        text: `SELECT ${this.createFunctionName}($1);`,
         values: [inputData]
       };
 
       const result = await this.client.query(preparedQuery);
-      return result.rows;
+      return result.rowCount;
     }
   }
   //& FindAll

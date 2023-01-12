@@ -2,10 +2,10 @@
 
 import { Router } from 'express';
 const router = Router();
-import { getAllUsers, getUser, signUp, signIn, signOut, updateUser, deleteUser } from '../controller/user.js'
+import { getAllUsers, getUserProfile, signUp, signIn, signOut, updateUser, deleteUser } from '../controller/user.js'
 
 router.get('/users', getAllUsers)
-router.get('/users/:id', getUser)
+router.get('/users/:id', getUserProfile)
 router.post('/users', signUp)
 router.post('/users/signIn', signIn)
 router.get('/users/signout', signOut)

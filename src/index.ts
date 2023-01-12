@@ -12,7 +12,7 @@ import { router } from './app/router/index.js';
 // import { _404 } from './app/service/errorHandling.js';
 
 // ~ LAUNCHER CONFIG ~ //
-app.use(router);
+app.use('/api/v1', router);
 // app.use(_404)
 
 

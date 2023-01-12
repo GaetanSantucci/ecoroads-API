@@ -61,6 +61,18 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION user_identity(_email text)
+	RETURNS TABLE (isExist BOOLEAN)
+	LANGUAGE plpgsql AS
+$$
+BEGIN 
+RETURN QUERY (SELECT EXISTS(SELECT * FROM "user" AS U WHERE U."email" = _email))
+END;
+$$;
+
+
+DROP FUNCTION user_identity;
 DROP FUNCTION create_user;
 
+SELECT user_identity('test@gtn.com');
 SELECT * FROM check_and_create_user('{"email":"fredo@gtn.com", "password":"Test1234!", "last_name":"Basler", "first_name":"Fredo"}');

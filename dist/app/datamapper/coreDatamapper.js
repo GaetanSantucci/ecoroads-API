@@ -17,12 +17,11 @@ class CoreDataMapper {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.client instanceof pg.Pool) {
                 const preparedQuery = {
-                    // todo PAS TOUT COMPRIS
-                    text: `SELECT * FROM ${this.createFunctionName}($1);`,
+                    text: `SELECT ${this.createFunctionName}($1);`,
                     values: [inputData]
                 };
                 const result = yield this.client.query(preparedQuery);
-                return result.rows;
+                return result.rowCount;
             }
         });
     }

@@ -9,7 +9,7 @@ app.use(express.json());
 import { router } from './app/router/index.js';
 // import { _404 } from './app/service/errorHandling.js';
 // ~ LAUNCHER CONFIG ~ //
-app.use(router);
+app.use('/api/v1', router);
 // app.use(_404)
 // eslint-disable-next-line no-undef
 const PORT = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 3000;
