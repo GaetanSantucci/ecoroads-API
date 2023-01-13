@@ -21,7 +21,6 @@ class UserDataMapper extends CoreDataMapper {
       };
 
       const result = await this.client.query(preparedQuery);
-      console.log('result: ', result);
       if (!result.rows[0]) return null;
       return result.rows[0];
     }

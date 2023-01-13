@@ -62,11 +62,11 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION user_identity(_email text)
-	RETURNS TABLE (isExist BOOLEAN)
+	RETURNS TABLE(id int,email EMAIL,password PASSWORD, last_name text, first_name text)
 	LANGUAGE plpgsql AS
 $$
 BEGIN 
-RETURN QUERY (SELECT EXISTS(SELECT * FROM "user" AS U WHERE U."email" = _email))
+RETURN QUERY (SELECT U."id", U."email", U."password", U."last_name", U."first_name" FROM "user" AS U WHERE U."email" = _email);
 END;
 $$;
 
