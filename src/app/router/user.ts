@@ -8,7 +8,7 @@ import { authenticateToken } from '../middleware/authenticateToken.js';
 
 router.get('/users', getAllUsers)
 
-router.post('/users', signUp)
+router.post('/users/signup', signUp)
 
 router.post('/users/signIn', signIn)
 router.get('/users/:userId(\\d+)', [authenticateToken, auth], getUserProfile)

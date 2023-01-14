@@ -10,27 +10,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import pg from 'pg';
 import { client } from '../services/dbClient.js';
 import { CoreDataMapper } from './coreDatamapper.js';
-class UserDataMapper extends CoreDataMapper {
+// import debug from 'debug';
+// const logger = debug('Datamapper');
+class LocationDataMapper extends CoreDataMapper {
     constructor() {
         super(...arguments);
-        this.tableName = 'user';
-        this.columns = `"id","email","last_name","first_name"`;
-        this.createFunctionName = 'create_user';
-        this.updateFunctionName = 'update_user';
-        this.userIdentity = 'user_identity';
+        this.tableName = 'location';
+        this.columns = `"id","label","address","street_number","zipcode","city","lat","lon"`;
+        this.createFunctionName = 'create_location';
+        this.findLocation = 'find_location';
     }
-    //& Find user by email
-    findUserIdentity(email) {
+    //& If need to create specific method for LocationDataMapper
+    findLocationByLatAndLon(lat, lon) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.client instanceof pg.Pool) {
                 const preparedQuery = {
-                    text: `
-                SELECT * FROM "${this.userIdentity}"($1);
-                `,
-                    values: [email]
+                    "text": `SELECT * FROM ${this.findLocation}($1, $2)`,
+                    "values": [lat, lon]
                 };
                 const result = yield this.client.query(preparedQuery);
-                console.log('result User: ', result.rows[0]);
                 if (!result.rows[0])
                     return null;
                 return result.rows[0];
@@ -39,5 +37,5 @@ class UserDataMapper extends CoreDataMapper {
     }
 }
 // todo Pourquoi 
-const User = new UserDataMapper(client);
-export { User };
+const Location = new LocationDataMapper(client);
+export { Location };

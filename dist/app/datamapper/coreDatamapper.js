@@ -21,6 +21,7 @@ class CoreDataMapper {
                     values: [inputData]
                 };
                 const result = yield this.client.query(preparedQuery);
+                console.log('Retour creation location: ', result);
                 return result.rowCount;
             }
         });

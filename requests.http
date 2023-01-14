@@ -1,0 +1,55 @@
+@entrypoint=http://localhost:5555/api/v1
+
+@accessToken=Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjMsImVtYWlsIjoiaGVsbG9AdGVzdC5jb20iLCJsYXN0X25hbWUiOiJMdWZmeSIsImZpcnN0X25hbWUiOiJHZWFyIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE2NzM3MDk0MzcsImV4cCI6MTY3Mzc5NTgzN30.LU8B4Dm9DtHGjsU014L5ByAHX5icdUtpZGSUWsWx1nQ
+
+@refreshToken=Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjIsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJsYXN0X25hbWUiOiJTdXBlciBBZG1pbiIsImZpcnN0X25hbWUiOiJHYWV0YW4iLCJpYXQiOjE2NzM3MDQ2MjQsImV4cCI6MTY3Mzg3NzQyNH0.Hm8yDWYI_Tm2WCwXuAf22J3rnEZcCqouATmiYG6cn-Q
+
+###
+#----------------------------------------------------- Get All Users
+GET {{entrypoint}}/users
+
+###
+#----------------------------------------------------- Create User
+POST {{entrypoint}}/users/signup
+Content-Type: application/json
+
+{
+    "email": "ussop@test.com",
+    "password": "blaBla83!!",
+    "last_name": "Sniperking",
+    "first_name": "Ussop",
+    "is_admin": true
+}
+
+###
+#----------------------------------------------------- User connection
+POST {{entrypoint}}/users/signin
+Content-Type: application/json
+
+{
+    "email": "ussop@test.com",
+    "password": "blaBla83!!"
+}
+
+###
+#----------------------------------------------------- Get User Profil with Auth
+GET {{entrypoint}}/users/23
+{{accessToken}}
+
+###
+#----------------------------------------------------- Update User
+PATCH {{entrypoint}}/users/23
+Content-Type: application/json
+{{accessToken}}
+
+{
+  "location": {
+    "lat": 44.34545,
+    "lon": 3.424545
+  }
+}
+
+###
+#----------------------------------------------------- Delete User
+DELETE {{entrypoint}}/users/21
+{{accessToken}}

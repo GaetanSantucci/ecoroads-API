@@ -12,7 +12,6 @@ function authenticateToken(req, res, next) {
             if (error)
                 throw new ErrorApi("The token is invalid", req, res, 403);
             req.user = user;
-            console.log('req.user: ', req.user);
             next();
         });
     }
