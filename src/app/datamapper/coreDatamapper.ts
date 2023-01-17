@@ -36,7 +36,6 @@ class CoreDataMapper {
       };
 
       const result = await this.client.query(preparedQuery);
-      console.log('Retour creation location: ', result);
       return result.rowCount;
     }
   }

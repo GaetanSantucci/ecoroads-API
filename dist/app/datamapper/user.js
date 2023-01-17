@@ -18,15 +18,14 @@ class UserDataMapper extends CoreDataMapper {
         this.createFunctionName = 'create_user';
         this.updateFunctionName = 'update_user';
         this.userIdentity = 'user_identity';
+        this.createUserLocation = 'create_user_location';
     }
     //& Find user by email
     findUserIdentity(email) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.client instanceof pg.Pool) {
                 const preparedQuery = {
-                    text: `
-                SELECT * FROM "${this.userIdentity}"($1);
-                `,
+                    text: `SELECT * FROM "${this.userIdentity}"($1);`,
                     values: [email]
                 };
                 const result = yield this.client.query(preparedQuery);
@@ -37,7 +36,18 @@ class UserDataMapper extends CoreDataMapper {
             }
         });
     }
+    updateUserLocation(locationId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.client instanceof pg.Pool) {
+                const preparedQuery = {
+                    text: `SELECT * FROM "${this.createUserLocation}"($1, $2);`,
+                    values: [locationId, userId]
+                };
+                const result = yield this.client.query(preparedQuery);
+                return result;
+            }
+        });
+    }
 }
-// todo Pourquoi 
 const User = new UserDataMapper(client);
 export { User };

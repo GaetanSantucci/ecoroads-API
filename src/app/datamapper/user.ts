@@ -9,14 +9,13 @@ class UserDataMapper extends CoreDataMapper {
   createFunctionName = 'create_user';
   updateFunctionName = 'update_user';
   userIdentity = 'user_identity';
+  createUserLocation = 'create_user_location';
 
   //& Find user by email
   async findUserIdentity(email: string) {
     if (this.client instanceof pg.Pool) {
       const preparedQuery = {
-        text: `
-                SELECT * FROM "${this.userIdentity}"($1);
-                `,
+        text: `SELECT * FROM "${this.userIdentity}"($1);`,
         values: [email]
       };
 
@@ -27,8 +26,19 @@ class UserDataMapper extends CoreDataMapper {
     }
   }
 
+  async updateUserLocation(locationId: number, userId: number) {
+    if (this.client instanceof pg.Pool) {
+      const preparedQuery = {
+        text: `SELECT * FROM "${this.createUserLocation}"($1, $2);`,
+        values: [locationId, userId]
+      }
+
+      const result = await this.client.query(preparedQuery);
+      return result
+    }
+  }
+
 }
 
-// todo Pourquoi 
 const User = new UserDataMapper(client);
 export { User }

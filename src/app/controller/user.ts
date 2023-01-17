@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { ErrorApi } from '../services/errorHandler.js';
 
+import { Validator } from '../utils/validator.js';
+
 import { User } from '../datamapper/user.js';
 import { Location } from '../datamapper/location.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
@@ -8,6 +10,7 @@ import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import debug from 'debug';
 const logger = debug('Controller');
 import bcrypt from 'bcrypt';
+import { userInfo } from 'os';
 
 //? ----------------------------------------------------------- GET ALL USERS
 const getAllUsers = async (req: Request, res: Response) => {
@@ -28,17 +31,21 @@ const signUp = async (req: Request, res: Response) => {
     const isExist = await User.findUserIdentity(email)
     if (isExist) throw new ErrorApi(`User with email ${isExist.email} already exists`, req, res, 401);
 
+    Validator.checkEmailPattern(email, req, res);
+    Validator.checkPasswordPattern(password, req, res);
+
+
     // regex to test if pattern valid
     // eslint-disable-next-line no-useless-escape
-    const regexMail = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/
-    const regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/
+    // const regexMail = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/
+    // const regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/
 
-    // Make control before send data to create user
-    const emailIsValid = regexMail.test(req.body.email)
-    if (!emailIsValid) throw new ErrorApi(`Format of the email is not valid`, req, res, 400)
+    // // Make control before send data to create user
+    // const emailIsValid = regexMail.test(req.body.email)
+    // if (!emailIsValid) throw new ErrorApi(`Format of the email is not valid`, req, res, 400)
 
-    const passwordIsSecure = regexPassword.test(req.body.password)
-    if (!passwordIsSecure) throw new ErrorApi(`Password not secure : min 6 characters, an upper case and a special character`, req, res, 400)
+    // const passwordIsSecure = regexPassword.test(req.body.password)
+    // if (!passwordIsSecure) throw new ErrorApi(`Password not secure : min 6 characters, an upper case and a special character`, req, res, 400)
 
     req.body.password = await bcrypt.hash(password, 10);
 
@@ -111,110 +118,51 @@ const signOut = async (req: Request, res: Response) => {
 //? ----------------------------------------------------------- UPDATE USER
 const updateUser = async (req: Request, res: Response) => {
 
-  // On veut recuperer lébody dans lequel il y aura les infos clients - l'adresse - la voiture
-  // const userToUpdate = {
-  //   "id": 24,
-  //   "email": "nami@test.com",
-  //   "last_name": "Nami",
-  //   "first_name": "Nami",
-  //   "location": {
-  //     "label": " 25 Grand line, 83100 South Blue",
-  //     "address": "Grand Line Sea",
-  //     "street_number": 2,
-  //     "zipcode": 83000,
-  //     "city": "East Blue",
-  //     "lat": -45.4541541514,
-  //     "lon": 3.45487421154
-  //   },
-  //   "car_id": 1
-  // }
-
-  const { lat, lon } = req.body.location;
-  const location = await Location.findLocationByLatAndLon(lat, lon);
-  if (location) {
-    req.body.location = location.id;
-  } else {
-    const locationToCreate = {
-      ...req.body.location,
-      user_id: req.body.id
-    }
-    await Location.create(locationToCreate)
-  }
-
-  // CHECK IF EMAIL NOT EXIST
-  const isExist = await User.findUserIdentity(req.body.email)
-  if (isExist) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
-  // CHECK PASSWORD AND HASH
-  // regex to test if pattern valid
-  // eslint-disable-next-line no-useless-escape
-  const regexMail = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/
-  const regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/
-
-  // Make control before send data to create user
-  const emailIsValid = regexMail.test(req.body.email)
-  if (!emailIsValid) throw new ErrorApi(`Format of the email is not valid`, req, res, 400)
-
-  const passwordIsSecure = regexPassword.test(req.body.password)
-  if (!passwordIsSecure) throw new ErrorApi(`Password not secure : min 6 characters, an upper case and a special character`, req, res, 400)
-
-  req.body.password = await bcrypt.hash(req.body.password, 10);
-  // SEND REQ.BODY TO UPDATGE FUNCTION
-  // creer une method location pour trouver une location via lat/lon, si not found, on creer la location, on retourne l'id qu on vient de creer et on transmet un json de type 
-  const updateUser = await User.update(req.body)
-  if (updateUser) return res.status(200).json(`You're profile has been successfully updated !`)
-  // const userToUpdateFinal = {
-  //   "id": 24,
-  //   "email": "nami@test.com",
-  //   "last_name": "Nami",
-  //   "first_name": "Nami",
-  //   "location_id": 1,
-  //   "car_id": 1
-  // }
-
-
-
   try {
     const userId = +req.params.userId;
     if (isNaN(userId)) throw new ErrorApi(`Id must be a number`, req, res, 400);
 
-    const user = await User.findOne(userId);
+    // // Check if user exist     
+    const userExist = await User.findOne(userId);
+    // logger('userExist: ', userExist);
+    if (!userExist) throw new ErrorApi(`User not found`, req, res, 401);
 
-    if (!user) throw new ErrorApi("User not found", req, res, 400);
+    const { lat, lon } = req.body.location;
+    const location = await Location.findLocationByLatAndLon(lat, lon);
+    // Check if location already exist
+    // if exist, insert into table pivot tu userId et the locationId and table user will be automatically updated with trigger
+    if (location) {
+      await User.updateUserLocation(location.id, userId)
+    } else {
+      // if location not found, create the new location and after insert into table pivot userId and locationId, table user will be automatically updated with trigger
+      // ! A voir si refacto possible pour eviter la nouvelle recherche du newLoactionCreated, je n'ai pas reussi a recuperer l'id lors du create  
+      const newLocationCreated = await Location.create(req.body.location)
+      if (newLocationCreated) {
+        const { id } = await Location.findLocationByLatAndLon(lat, lon);
+        await User.updateUserLocation(id, userId)
+      }
+    }
 
-    // if (req.body.location !== undefined && isNaN(req.body.location)) {
-    //   const existingLocation = await Location.findOrCreateLocation(req.body.location);
-    //   if (existingLocation) req.body.location = existingLocation;
-    // }
+    // CHECK IF EMAIL NOT EXIST
+    if (req.body.email) {
+      const isExist = await User.findUserIdentity(req.body.email)
+      if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
+      Validator.checkEmailPattern(req.body.email, req, res);
+    }
 
-    // if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
+    // CHECK PASSWORD AND HASH
+    if (req.body.password) {
+      Validator.checkPasswordPattern(req.body.password, req, res);
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    }
 
-    // if (email) {
-    //   if (!emailValidator.validate(email))
-    //     return res.status(500).json({ error: `${email} invalide !` });
-    // }
+    logger('req.body avant update', req.body);
 
-    // if (password === "") {
-    //   req.body.password = user.rows[0].password;
-    // } else {
-    //   if (!schema.validate(password))
-    //     return res
-    //       .status(500)
-    //       .json({
-    //         error: "Le mot de passe doit contenir au moins 6 caractères, une majuscule et un caractère spécial.",
-    //       });
-    //   req.body.password = await bcrypt.hash(password, 10);
-    // }
+    //todo mettre en place les categories 
+    //if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
 
-    // if (username) validation.body(usernameSchema);
-
-    // await User.updateUser(userId, req.body);
-
-    res.status(200).json({ message: "L'utilisateur a bien été mis à jour" });
-
-    req.user = null;
-    req.session.destroy();
-
-    res.status(200).json("User successfully updated !")
+    const userUpdated = await User.update(req.body);
+    if (userUpdated) return res.status(200).json("User successfully updated !")
   } catch (err) {
     if (err instanceof Error) logger(err.message)
   }

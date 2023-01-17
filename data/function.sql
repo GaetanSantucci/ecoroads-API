@@ -105,22 +105,71 @@ BEGIN
 				($1 ->> 'lat')::NUMERIC,
 				($1 ->> 'lon')::NUMERIC
 				)
-				UPDATE "user" AS U SET "location_id" = (SELECT id FROM "location"  WHERE "label" = ($1 ->> 'label')::TEXT) 
-				WHERE "id" = ($1 ->> 'user_id')::INT;
+				RETURNING id;
 END;
 $$;
 
+-- TEST function create_location
+SELECT * FROM create_location('{"label":"21 jump Street Manhanttan","address":"jump street","street_number":21, "zipcode": 93000, "city": "New York", "lat":40.001, "lon": 0.007, "user_id": 25}')
+
+
+CREATE OR REPLACE FUNCTION create_user_location(locationId INT, userId INT)
+RETURNS VOID
+LANGUAGE plpgsql AS
+$$
+BEGIN
+	WITH deleted AS (DELETE FROM "user_has_location" WHERE user_id = userId RETURNING *)
+	INSERT INTO "user_has_location"("location_id", "user_id")
+	VALUES(locationId, userId);
+END;
+$$;
+
+-- * TEST FUNCTION create_user_location --------------------------------------
+SELECT * FROM create_user_location(50, 23);
+
+
+--!---------------------------------------------------------------------------
+--!---------------------------------------------------------------------------
+
+-- Create update user location to update location_id in table user when insert a row in table user_has_location with a trigger 
+CREATE OR REPLACE FUNCTION update_user_location()
+	RETURNS TRIGGER AS $$
+	BEGIN 
+		IF (TG_OP = 'DELETE') THEN
+			UPDATE "user" SET location_id = NULL WHERE location_id = OLD.location_id;
+		    ELSE
+        UPDATE "user" SET location_id = NEW.location_id WHERE "user".id = NEW.user_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER update_user_location_trigger
+	AFTER DELETE OR INSERT ON user_has_location
+	FOR EACH ROW
+	EXECUTE FUNCTION update_user_location();
+
+--!---------------------------------------------------------------------------
+--!---------------------------------------------------------------------------
+
+DROP TRIGGER  update_user_location_trigger ON "user_has_location";
+DROP FUNCTION update_user_location();
+
+-- Tests for trigger
+TABLE "user";
+TABLE "location";
+TABLE "user_has_location";
+TABLE "user_like_category";
+
+INSERT INTO public."user_has_location"("location_id", "user_id")
+	VALUES (13, 24);
+	
+	DELETE FROM public."user_has_location" WHERE "location_id" = 37;
+
+-- DROP FUNCTION ------------------------------ // 
 DROP FUNCTION find_location();
-
-
-BEGIN;
-	INSERT INTO "location"("label", "address", "street_number", "zipcode", "city", "lat", "lon")
-	VALUES('4 rue de la forge', 'rue de la forge', 4, 63360,'Lussat',4.4545, 1.7841	)
-		RETURNING id;			
-		UPDATE "user" SET "location_id" = 
-			(SELECT id FROM "location" WHERE "label" = '4 rue de la forge') 
-		WHERE "id" = 24;
-COMMIT;
-
-
-SELECT * FROM create_location('{"label":"21 jump Street Manhanttan","address":"jump street","street_number":21, "zipcode": 93000, "city": "New York, "lat":40.001, "lon": 0.007, "user_id": 25}')
+DROP FUNCTION create_location(json);
+DROP FUNCTION create_user_location(int int);
+DROP TRIGGER  update_user_location_trigger ON "user_has_location";
+DROP FUNCTION update_user_location();
