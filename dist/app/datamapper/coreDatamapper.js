@@ -21,7 +21,8 @@ class CoreDataMapper {
                     values: [inputData]
                 };
                 const result = yield this.client.query(preparedQuery);
-                return result.rowCount;
+                console.log('result: ', result);
+                return { rowCount: result.rowCount, locationId: result.rows[0] };
             }
         });
     }

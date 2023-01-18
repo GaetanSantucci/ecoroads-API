@@ -135,34 +135,34 @@ const updateUser = async (req: Request, res: Response) => {
       await User.updateUserLocation(location.id, userId)
     } else {
       // if location not found, create the new location and after insert into table pivot userId and locationId, table user will be automatically updated with trigger
-      // ! A voir si refacto possible pour eviter la nouvelle recherche du newLoactionCreated, je n'ai pas reussi a recuperer l'id lors du create  
+
       const newLocationCreated = await Location.create(req.body.location)
       if (newLocationCreated) {
-        const { id } = await Location.findLocationByLatAndLon(lat, lon);
-        await User.updateUserLocation(id, userId)
+        const locationId = newLocationCreated.locationId.create_location
+        await User.updateUserLocation(locationId, userId)
       }
     }
 
-    // CHECK IF EMAIL NOT EXIST
-    if (req.body.email) {
-      const isExist = await User.findUserIdentity(req.body.email)
-      if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
-      Validator.checkEmailPattern(req.body.email, req, res);
-    }
+    // // CHECK IF EMAIL NOT EXIST
+    // if (req.body.email) {
+    //   const isExist = await User.findUserIdentity(req.body.email)
+    //   if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
+    //   Validator.checkEmailPattern(req.body.email, req, res);
+    // }
 
-    // CHECK PASSWORD AND HASH
-    if (req.body.password) {
-      Validator.checkPasswordPattern(req.body.password, req, res);
-      req.body.password = await bcrypt.hash(req.body.password, 10);
-    }
+    // // CHECK PASSWORD AND HASH
+    // if (req.body.password) {
+    //   Validator.checkPasswordPattern(req.body.password, req, res);
+    //   req.body.password = await bcrypt.hash(req.body.password, 10);
+    // }
 
-    logger('req.body avant update', req.body);
+    // logger('req.body avant update', req.body);
 
-    //todo mettre en place les categories 
-    //if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
+    // //todo mettre en place les categories 
+    // //if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
 
-    const userUpdated = await User.update(req.body);
-    if (userUpdated) return res.status(200).json("User successfully updated !")
+    // const userUpdated = await User.update(req.body);
+    // if (userUpdated) return res.status(200).json("User successfully updated !")
   } catch (err) {
     if (err instanceof Error) logger(err.message)
   }

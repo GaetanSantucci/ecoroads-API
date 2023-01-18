@@ -1,6 +1,6 @@
 @entrypoint=http://localhost:5555/api/v1
 
-@accessToken=Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjMsImVtYWlsIjoiaGVsbG9AdGVzdC5jb20iLCJsYXN0X25hbWUiOiJMdWZmeSIsImZpcnN0X25hbWUiOiJHZWFyIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE2NzM3MDk0MzcsImV4cCI6MTY3Mzc5NTgzN30.LU8B4Dm9DtHGjsU014L5ByAHX5icdUtpZGSUWsWx1nQ
+@accessToken=Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjUsImVtYWlsIjoidXNzb3BAdGVzdC5jb20iLCJsYXN0X25hbWUiOiJTbmlwZXJraW5nIiwiZmlyc3RfbmFtZSI6IlVzc29wIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTY3NDAzMzI0OCwiZXhwIjoxNjc0MTE5NjQ4fQ.yowLwo_7R6tf2byGaUZbecTYjPgdY1sRuOjiODUgoNE
 
 @refreshToken=Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjIsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJsYXN0X25hbWUiOiJTdXBlciBBZG1pbiIsImZpcnN0X25hbWUiOiJHYWV0YW4iLCJpYXQiOjE2NzM3MDQ2MjQsImV4cCI6MTY3Mzg3NzQyNH0.Hm8yDWYI_Tm2WCwXuAf22J3rnEZcCqouATmiYG6cn-Q
 
@@ -43,10 +43,16 @@ Content-Type: application/json
 {{accessToken}}
 
 {
+  "id": 23,
   "location": {
-    "lat": 44.34545,
-    "lon": 3.424545
-  }
+        "label": " 25 Grand line, 83100 South Blue",
+        "address": "Grand Line Sea",
+        "street_number": 2,
+        "zipcode": 83000,
+        "city": "East Blue",
+        "lat": 1.4854891,
+        "lon": -8.121549
+    }
 }
 
 ###
