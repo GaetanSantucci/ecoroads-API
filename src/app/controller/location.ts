@@ -35,13 +35,15 @@ const createLocation = async (req: Request, res: Response) => {
   try {
     // todo implement AJV schema in middleware to validate input format 
     // check if location already exists
-    const { lat, lon } = req.body
+    const { lat, lon } = req.body;
+    logger('lat, lon: ', lat, lon);
     const locationExists = await Location.findLocationByLatAndLon(lat, lon)
+    logger('locationExists: ', locationExists);
     if (locationExists) throw new ErrorApi('Location already exists', req, res, 400);
 
     // create location if not exists
     const result = await Location.create(req.body);
-    if (result) return res.status(200).json('Location has been successfully created')
+    if (result?.rowCount) return res.status(200).json('Location has been successfully created')
   } catch (err) {
     if (err instanceof Error) logger(err.message)
   }

@@ -10,6 +10,7 @@ class LocationDataMapper extends CoreDataMapper {
   columns = `"id","label","address","street_number","zipcode","city","lat","lon"`
 
   createFunctionName = 'create_location';
+  updateFunctionName = 'update_location';
   findLocation = 'find_location'
 
   //& If need to create specific method for LocationDataMapper

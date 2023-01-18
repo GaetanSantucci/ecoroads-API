@@ -91,9 +91,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION create_location(json)
-RETURNS VOID
-LANGUAGE plpgsql AS
-$$
+RETURNS INT AS $$
 BEGIN
 			INSERT INTO "location"("label", "address", "street_number", "zipcode", "city", "lat", "lon")
 			VALUES(
@@ -105,12 +103,29 @@ BEGIN
 				($1 ->> 'lat')::NUMERIC,
 				($1 ->> 'lon')::NUMERIC
 				)
-				RETURNING id;
+				RETURN (SELECT L.id FROM "location" as L ORDER BY L.id DESC LIMIT 1);
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 -- TEST function create_location
 SELECT * FROM create_location('{"label":"21 jump Street Manhanttan","address":"jump street","street_number":21, "zipcode": 93000, "city": "New York", "lat":40.001, "lon": 0.007, "user_id": 25}')
+
+CREATE OR REPLACE FUNCTION update_location(json)
+RETURNS INT
+BEGIN
+	UPDATE "location"
+    	SET
+          "label" = COALESCE(( $1 ->> 'label' )::TEXT, label),
+          "address" = COALESCE(( $1 ->> 'address' )::TEXT, address),
+          "street_number" = COALESCE(( $1 ->> 'street_number')::INTEGER, street_number),
+          "zipcode" = COALESCE(( $1 ->> 'zipcode')::postal_code_fr, zipcode),
+          "city" = COALESCE(( $1 ->> 'city' )::TEXT, city),
+          "lat" = COALESCE (( $1 ->> 'lat' )::NUMERIC, lat),
+          "lon" = COALESCE(($1 ->> 'lon')::NUMERIC, lon)
+      WHERE "location"."id" = ($1 ->> 'id')::INT;
+			RETURNING id;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION create_user_location(locationId INT, userId INT)

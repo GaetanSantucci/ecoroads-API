@@ -18,6 +18,7 @@ class LocationDataMapper extends CoreDataMapper {
         this.tableName = 'location';
         this.columns = `"id","label","address","street_number","zipcode","city","lat","lon"`;
         this.createFunctionName = 'create_location';
+        this.updateFunctionName = 'update_location';
         this.findLocation = 'find_location';
     }
     //& If need to create specific method for LocationDataMapper

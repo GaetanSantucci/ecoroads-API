@@ -46,12 +46,14 @@ const createLocation = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // todo implement AJV schema in middleware to validate input format 
         // check if location already exists
         const { lat, lon } = req.body;
+        logger('lat, lon: ', lat, lon);
         const locationExists = yield Location.findLocationByLatAndLon(lat, lon);
+        logger('locationExists: ', locationExists);
         if (locationExists)
             throw new ErrorApi('Location already exists', req, res, 400);
         // create location if not exists
         const result = yield Location.create(req.body);
-        if (result)
+        if (result === null || result === void 0 ? void 0 : result.rowCount)
             return res.status(200).json('Location has been successfully created');
     }
     catch (err) {
