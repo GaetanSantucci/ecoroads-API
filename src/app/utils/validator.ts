@@ -1,6 +1,7 @@
 import { ErrorApi } from '../services/errorHandler.js';
 import { Request, Response } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 interface Validator {
   emailPattern: RegExp;
   passwordPattern: RegExp;

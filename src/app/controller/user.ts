@@ -10,13 +10,13 @@ import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 import debug from 'debug';
 const logger = debug('Controller');
 import bcrypt from 'bcrypt';
-import { userInfo } from 'os';
 
 //? ----------------------------------------------------------- GET ALL USERS
 const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const usersList = await User.findAll();
-    return res.status(200).json(usersList)
+    const userList = await User.findAll();
+    if (!userList) throw new ErrorApi('No users found', req, res, 400);
+    return res.status(200).json(userList)
   } catch (err) {
     if (err instanceof Error) logger(err.message)
   }
@@ -122,9 +122,8 @@ const updateUser = async (req: Request, res: Response) => {
     const userId = +req.params.userId;
     if (isNaN(userId)) throw new ErrorApi(`Id must be a number`, req, res, 400);
 
-    // // Check if user exist     
+    // Check if user exist     
     const userExist = await User.findOne(userId);
-    // logger('userExist: ', userExist);
     if (!userExist) throw new ErrorApi(`User not found`, req, res, 401);
 
     const { lat, lon } = req.body.location;
@@ -135,7 +134,6 @@ const updateUser = async (req: Request, res: Response) => {
       await User.updateUserLocation(location.id, userId)
     } else {
       // if location not found, create the new location and after insert into table pivot userId and locationId, table user will be automatically updated with trigger
-
       const newLocationCreated = await Location.create(req.body.location)
       if (newLocationCreated) {
         const locationId = newLocationCreated.locationId.create_location
@@ -143,26 +141,21 @@ const updateUser = async (req: Request, res: Response) => {
       }
     }
 
-    // // CHECK IF EMAIL NOT EXIST
-    // if (req.body.email) {
-    //   const isExist = await User.findUserIdentity(req.body.email)
-    //   if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
-    //   Validator.checkEmailPattern(req.body.email, req, res);
-    // }
+    // CHECK IF EMAIL NOT EXIST
+    if (req.body.email) {
+      const isExist = await User.findUserIdentity(req.body.email)
+      if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
+      Validator.checkEmailPattern(req.body.email, req, res);
+    }
 
-    // // CHECK PASSWORD AND HASH
-    // if (req.body.password) {
-    //   Validator.checkPasswordPattern(req.body.password, req, res);
-    //   req.body.password = await bcrypt.hash(req.body.password, 10);
-    // }
+    // CHECK PASSWORD AND HASH
+    if (req.body.password) {
+      Validator.checkPasswordPattern(req.body.password, req, res);
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    }
 
-    // logger('req.body avant update', req.body);
-
-    // //todo mettre en place les categories 
-    // //if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
-
-    // const userUpdated = await User.update(req.body);
-    // if (userUpdated) return res.status(200).json("User successfully updated !")
+    const userUpdated = await User.update(req.body);
+    if (userUpdated) return res.status(200).json("User successfully updated !")
   } catch (err) {
     if (err instanceof Error) logger(err.message)
   }

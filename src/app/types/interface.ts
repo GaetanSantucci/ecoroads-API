@@ -8,4 +8,14 @@ type coreDataMapper = {
   updateFunctionName: string;
 }
 
-export { coreDataMapper }
+type locationType = {
+  label: string,
+  address: string,
+  street_number: number,
+  zipcode: number,
+  city: string,
+  lat: number,
+  lon: number
+}
+
+export { coreDataMapper, locationType }

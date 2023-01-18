@@ -29,8 +29,10 @@ import bcrypt from 'bcrypt';
 //? ----------------------------------------------------------- GET ALL USERS
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const usersList = yield User.findAll();
-        return res.status(200).json(usersList);
+        const userList = yield User.findAll();
+        if (!userList)
+            throw new ErrorApi('No users found', req, res, 400);
+        return res.status(200).json(userList);
     }
     catch (err) {
         if (err instanceof Error)
@@ -127,9 +129,8 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const userId = +req.params.userId;
         if (isNaN(userId))
             throw new ErrorApi(`Id must be a number`, req, res, 400);
-        // // Check if user exist     
+        // Check if user exist     
         const userExist = yield User.findOne(userId);
-        // logger('userExist: ', userExist);
         if (!userExist)
             throw new ErrorApi(`User not found`, req, res, 401);
         const { lat, lon } = req.body.location;
@@ -147,22 +148,21 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 yield User.updateUserLocation(locationId, userId);
             }
         }
-        // // CHECK IF EMAIL NOT EXIST
-        // if (req.body.email) {
-        //   const isExist = await User.findUserIdentity(req.body.email)
-        //   if (isExist && !req.body.email) throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
-        //   Validator.checkEmailPattern(req.body.email, req, res);
-        // }
-        // // CHECK PASSWORD AND HASH
-        // if (req.body.password) {
-        //   Validator.checkPasswordPattern(req.body.password, req, res);
-        //   req.body.password = await bcrypt.hash(req.body.password, 10);
-        // }
-        // logger('req.body avant update', req.body);
-        // //todo mettre en place les categories 
-        // //if (req.body.categories) await Category.updateCategories(req.body.categories, userId);
-        // const userUpdated = await User.update(req.body);
-        // if (userUpdated) return res.status(200).json("User successfully updated !")
+        // CHECK IF EMAIL NOT EXIST
+        if (req.body.email) {
+            const isExist = yield User.findUserIdentity(req.body.email);
+            if (isExist && !req.body.email)
+                throw new ErrorApi(`User with email ${isExist.email} already exists, choose another !`, req, res, 401);
+            Validator.checkEmailPattern(req.body.email, req, res);
+        }
+        // CHECK PASSWORD AND HASH
+        if (req.body.password) {
+            Validator.checkPasswordPattern(req.body.password, req, res);
+            req.body.password = yield bcrypt.hash(req.body.password, 10);
+        }
+        const userUpdated = yield User.update(req.body);
+        if (userUpdated)
+            return res.status(200).json("User successfully updated !");
     }
     catch (err) {
         if (err instanceof Error)
